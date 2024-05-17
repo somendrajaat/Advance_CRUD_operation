@@ -1,9 +1,8 @@
 package com.dailype.task.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.Data;
 
 //import javax.persistence.*;
@@ -20,6 +19,8 @@ public class people {
     private String mobNum;
     private String panNum;
     @ManyToOne
+    @JoinColumn(name = "manager_id")
+    @JsonBackReference
     private Manager manager;
     private boolean isActive;
     private LocalDateTime createdAt;

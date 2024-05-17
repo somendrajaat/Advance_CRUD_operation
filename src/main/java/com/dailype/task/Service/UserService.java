@@ -1,10 +1,7 @@
 package com.dailype.task.Service;
 
 
-import com.dailype.task.Model.BulkUpdateRequest;
-import com.dailype.task.Model.UserRequest;
-import com.dailype.task.Model.people;
-import com.dailype.task.Model.Manager;
+import com.dailype.task.Model.*;
 import com.dailype.task.Repository.UserRepository;
 import com.dailype.task.Repository.managerRepository;
 
@@ -66,9 +63,25 @@ public class UserService {
         if (managerId != null) {
             Optional<Manager> manager = managerRepository.findByIdAndIsActive(managerId, true);
             if (manager.isEmpty()) {
-                throw new IllegalArgumentException("Invalid or inactive manager ID");
+                Optional<people> people = userRepository.findById(managerId);
+
+                if(people.isEmpty()){
+                    throw new IllegalArgumentException("Invalid or inactive manager ID");
+                }
+                Manager newManager = new Manager();
+                newManager.setName(people.get().getFullName());
+                newManager.setActive(true);
+                newManager.setId(people.get().getId());
+                newManager.setCreatedAt(LocalDateTime.now());
+                newManager.setUpdatedAt(LocalDateTime.now());
+                managerRepository.save(newManager);
+                user.setManager(newManager);
+
+            }else {
+                System.out.print("hello");
+                user.setManager(manager.get());
             }
-        user.setManager(manager.get());
+//        user.setManager(manager.get());
         }
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -94,7 +107,7 @@ public class UserService {
     }
 
 
-//this function is used to delete the user based on the parameters passed
+    //this function is used to delete the user based on the parameters passed
     public Map<String, String> deleteUser(Map<String, String> params) {
 
         String userId = params.get("userId");
@@ -205,5 +218,21 @@ public class UserService {
         }
 
         return ResponseEntity.ok("Users updated successfully");
+    }
+
+    public void createManager(managerRequest managerRequest) {
+        Manager manager = new Manager();
+        if (managerRequest.getId() == null) {
+            manager.setId(UUID.randomUUID());
+        }
+        manager.setName(managerRequest.getName());
+        manager.setCreatedAt(LocalDateTime.now());
+        manager.setUpdatedAt(LocalDateTime.now());
+        manager.setActive(true);
+        managerRepository.save(manager);
+    }
+    public List<Manager> getAllManagersWithPeople() {
+        return  managerRepository.findAllWithPeople();
+
     }
 }
